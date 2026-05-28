@@ -1,0 +1,86 @@
+package com.tab.perf;
+
+import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
+import org.apache.jmeter.testelement.TestElement;
+import javax.swing.*;
+import java.awt.*;
+
+public class CustomGrpcSamplerGui extends AbstractSamplerGui {
+
+    private JTextField hostField;
+    private JTextField portField;
+    private JTextField tokenField;
+    private JTextArea payloadArea;
+
+    public CustomGrpcSamplerGui() {
+        initUI();
+    }
+
+    @Override
+    public String getLabelResource() {
+        return null; // Bypasses explicit localization properties files
+    }
+
+    @Override
+    public String getStaticLabel() {
+        return "TAB Custom gRPC Sampler Engine";
+    }
+
+    @Override
+    public TestElement createTestElement() {
+        CustomGrpcSampler sampler = new CustomGrpcSampler();
+        modifyTestElement(sampler);
+        return sampler;
+    }
+
+    @Override
+    public void modifyTestElement(TestElement element) {
+        super.configureTestElement(element);
+        if (element instanceof CustomGrpcSampler) {
+            CustomGrpcSampler sampler = (CustomGrpcSampler) element;
+            sampler.setHost(hostField.getText());
+            sampler.setPort(portField.getText());
+            sampler.setToken(tokenField.getText());
+            sampler.setPayload(payloadArea.getText());
+        }
+    }
+
+    @Override
+    public void configure(TestElement element) {
+        super.configure(element);
+        if (element instanceof CustomGrpcSampler) {
+            CustomGrpcSampler sampler = (CustomGrpcSampler) element;
+            hostField.setText(sampler.getHost());
+            portField.setText(sampler.getPort());
+            tokenField.setText(sampler.getToken());
+            payloadArea.setText(sampler.getPayload());
+        }
+    }
+
+    private void initUI() {
+        setLayout(new BorderLayout(0, 5));
+        setBorder(makeBorder());
+        add(makeTitlePanel(), BorderLayout.NORTH);
+
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 1.0;
+
+        hostField = new JTextField(30);
+        portField = new JTextField(5);
+        tokenField = new JTextField(30);
+        payloadArea = new JTextArea(12, 50);
+
+        mainPanel.add(new JLabel("Server Host:"), gbc);
+        gbc.gridy++; mainPanel.add(hostField, gbc);
+        mainPanel.add(new JLabel("Port Number:"), gbc);
+        gbc.gridy++; mainPanel.add(portField, gbc);
+        mainPanel.add(new JLabel("Authorization JWT Token (Raw):"), gbc);
+        gbc.gridy++; mainPanel.add(tokenField, gbc);
+        mainPanel.add(new JLabel("Request JSON Body Payload:"), gbc);
+        gbc.gridy++; mainPanel.add(new JScrollPane(payloadArea), gbc);
+
+        add(mainPanel, BorderLayout.CENTER);
+    }
+}
